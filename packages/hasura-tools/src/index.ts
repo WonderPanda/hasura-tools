@@ -1,1 +1,1 @@
-export * from './lib/hasura-tools';
+export * from './lib/permission-generator';

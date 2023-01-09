@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "projects": {
+    "graphql-types": "packages/graphql-types",
+    "hasura-tools": "packages/hasura-tools"
+  }
+}

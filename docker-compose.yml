@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  postgres:
+    image: supabase/postgres:13.3.0
+    # image: timescale/timescaledb:latest-pg13
+    ports:
+      - '${DB_HOST_PORT}:5432'
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  hasura:
+    image: hasura/graphql-engine:v2.15.2
+    ports:
+      - '${HASURA_HOST_PORT}:8080'
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
+    depends_on:
+      - 'postgres'
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: ${DOCKER_DATABASE_URL}
+      HASURA_GRAPHQL_ENABLE_CONSOLE: 'true' # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "${JWT_SECRET}"}'
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      HASURA_GRAPHQL_UNAUTHORIZED_ROLE: anonymous
+      HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS: 'true'
+      HASURA_GRAPHQL_EXPERIMENTAL_FEATURES: naming_convention
+      HASURA_GRAPHQL_DEFAULT_NAMING_CONVENTION: 'graphql-default'
+      NESTJS_BASE_URL: ${NESTJS_BASE_URL}
+      NESTJS_EVENT_WEBHOOK_ENDPOINT: ${NESTJS_BASE_URL}/hasura/events
+      NESTJS_EVENT_WEBHOOK_SHARED_SECRET: ${NESTJS_EVENT_WEBHOOK_SHARED_SECRET}
+      HASURA_GRAPHQL_MIGRATIONS_SERVER_TIMEOUT: 30
+      HASURA_GRAPHQL_NO_OF_RETRIES: 10
+      HASURA_GRAPHQL_DEV_MODE: 'true'
+
+volumes:
+  db_data:

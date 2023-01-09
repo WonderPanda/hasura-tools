@@ -1,0 +1,18 @@
+table:
+  name: organizations
+  schema: public
+array_relationships:
+  - name: memberships
+    using:
+      foreign_key_constraint_on:
+        column: organization_id
+        table:
+          name: memberships
+          schema: public
+  - name: posts
+    using:
+      foreign_key_constraint_on:
+        column: organization_id
+        table:
+          name: posts
+          schema: public
