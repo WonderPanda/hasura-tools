@@ -37,14 +37,12 @@ export const generatePermissionsLibrary = async (
     schemaNames,
   });
 
-  const sourceTypesTsConfig = join(__dirname, '../../../tsconfig.lib.json');
-  const sourceTypesProject = new Project({
-    tsConfigFilePath: sourceTypesTsConfig,
-  });
+  const sourceTypesProject = new Project({});
 
-  const sourceTypesFile = sourceTypesProject.getSourceFileOrThrow(
+  const sourceTypesFile = sourceTypesProject.addSourceFileAtPath(
     join(__dirname, 'types.ts')
   );
+
   const interfacesToCopy = sourceTypesFile.getInterfaces();
 
   const outputProject = new Project({

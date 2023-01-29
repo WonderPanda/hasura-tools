@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "hasura": "hasura --project ./hasura --envfile ../.env --skip-update-check"
+    "hasura": "hasura --project ./hasura --envfile ../.env --skip-update-check",
+    "lint": "pnpm nx run-many --target=lint",
+    "release": "pnpm changeset publish"
   },
   "private": true,
   "devDependencies": {
+    "@changesets/cli": "^2.26.0",
     "@graphql-codegen/cli": "^2.16.3",
     "@graphql-codegen/typescript": "^2.8.7",
     "@nrwl/eslint-plugin-nx": "15.4.2",

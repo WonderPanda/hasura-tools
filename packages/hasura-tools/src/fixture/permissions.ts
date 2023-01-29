@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { SnakeCase, SnakeCasedPropertiesDeep } from 'type-fest';
 import {
   MembershipsBoolExp,
