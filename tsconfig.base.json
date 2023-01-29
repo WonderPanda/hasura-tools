@@ -16,7 +16,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@pandaverse/hasura-tools": ["packages/hasura-tools/src/index.ts"]
+      "@pandaverse/hasura-tools": ["packages/hasura-tools/src/index.ts"],
+      "@pandaverse/graphql-types": ["packages/graphql-types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

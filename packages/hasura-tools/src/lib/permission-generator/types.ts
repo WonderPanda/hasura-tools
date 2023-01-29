@@ -34,6 +34,11 @@ export interface UpdatePermission<
   set?: Partial<Record<TSelectColumn, TSessionVariables>>;
 }
 
+export interface DeletePermission<TBoolExp> {
+  filter?: TBoolExp;
+  backend_only?: boolean;
+}
+
 export interface InsertPermissionForRole<
   TRoles extends string,
   TBoolExp,
@@ -61,6 +66,11 @@ export interface UpdatePermissionForRole<
   permission: UpdatePermission<TBoolExp, TSelectColumn>;
 }
 
+export interface DeletePermissionForRole<TRoles extends string, TBoolExp> {
+  role: TRoles;
+  permission: DeletePermission<TBoolExp>;
+}
+
 export interface EntityPermissions<
   TRoles extends string,
   TBoolExp,
@@ -81,6 +91,7 @@ export interface EntityPermissions<
     TBoolExp,
     TSelectColumn
   >[];
+  delete_permissions?: DeletePermissionForRole<TRoles, TBoolExp>[];
 }
 
 export interface PermissionsExport<

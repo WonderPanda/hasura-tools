@@ -11,6 +11,7 @@ specifiers:
   '@nrwl/web': 15.4.2
   '@nrwl/workspace': 15.4.2
   '@types/jest': 28.1.1
+  '@types/js-yaml': ^4.0.5
   '@types/lodash': ^4.14.191
   '@types/node': 16.11.7
   '@typescript-eslint/eslint-plugin': ^5.36.1
@@ -23,6 +24,7 @@ specifiers:
   hasura-cli: ^2.16.1
   jest: 28.1.1
   jest-environment-jsdom: 28.1.1
+  js-yaml: ^4.1.0
   lodash: ^4.17.21
   nx: 15.4.2
   prettier: ^2.6.2
@@ -35,6 +37,7 @@ specifiers:
 
 dependencies:
   globby: 11.1.0
+  js-yaml: 4.1.0
   lodash: 4.17.21
   ts-morph: 17.0.1
   tslib: 2.4.1
@@ -51,6 +54,7 @@ devDependencies:
   '@nrwl/web': 15.4.2_rkxqade4pk3jqop7m7yy2fei7m
   '@nrwl/workspace': 15.4.2_p752534vrtp6ugcax5ov3na6la
   '@types/jest': 28.1.1
+  '@types/js-yaml': 4.0.5
   '@types/lodash': 4.14.191
   '@types/node': 18.11.18
   '@typescript-eslint/eslint-plugin': 5.48.0_5h7afou27muhw6nte4lfovu3qi
@@ -3915,7 +3919,6 @@ packages:
 
   /argparse/2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
-    dev: true
 
   /array-flatten/1.1.1:
     resolution: {integrity: sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==}
@@ -7317,7 +7320,6 @@ packages:
     hasBin: true
     dependencies:
       argparse: 2.0.1
-    dev: true
 
   /jsdom/19.0.0:
     resolution: {integrity: sha512-RYAyjCbxy/vri/CfnjUWJQQtZ3LKlLnDqj+9XLNnJPgEGeirZs3hllKR20re8LUZ6o1b1X4Jat+Qd26zmP41+A==}

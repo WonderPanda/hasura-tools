@@ -1,8 +1,10 @@
 import { PermissionGeneratorConfig } from './config';
+import { dump, load } from 'js-yaml';
 import { Project } from 'ts-morph';
 import { scanTables } from './metadata.utils';
 import { capitalize, flatten } from 'lodash';
 import { join } from 'path';
+import { readFileSync, writeFileSync } from 'fs';
 
 export const nameFromNamingConvention = (
   namingConvention: PermissionGeneratorConfig['namingConvention'] = 'graphql-default',
@@ -27,7 +29,7 @@ export const generatePermissionsLibrary = async (
     allowedSessionVariables,
   } = config;
 
-  const { pathToTsConfig, sourceFile } = graphqlTypes;
+  const { pathToTsConfig, sourceFile, importDeclaration } = graphqlTypes;
 
   const tableNames = await scanTables({
     databaseName,
@@ -35,11 +37,14 @@ export const generatePermissionsLibrary = async (
     schemaNames,
   });
 
+  const sourceTypesTsConfig = join(__dirname, '../../../tsconfig.lib.json');
   const sourceTypesProject = new Project({
-    tsConfigFilePath: join(__dirname, '../../../tsconfig.lib.json'),
+    tsConfigFilePath: sourceTypesTsConfig,
   });
 
-  const sourceTypesFile = sourceTypesProject.getSourceFileOrThrow('types.ts');
+  const sourceTypesFile = sourceTypesProject.getSourceFileOrThrow(
+    join(__dirname, 'types.ts')
+  );
   const interfacesToCopy = sourceTypesFile.getInterfaces();
 
   const outputProject = new Project({
@@ -57,6 +62,7 @@ export const generatePermissionsLibrary = async (
   );
 
   const sessionVariables = destination.addTypeAlias({
+    isExported: true,
     name: 'SessionVariables',
     type: allowedSessionVariables
       ? allowedSessionVariables.map((sv) => `'${sv}'`).join(' | ')
@@ -85,7 +91,7 @@ export const generatePermissionsLibrary = async (
   destination
     .addImportDeclaration({
       // TODO: Make this configurable
-      moduleSpecifier: `./${sourceFile.replace('.ts', '')}`,
+      moduleSpecifier: importDeclaration,
     })
     .addNamedImports(
       flatten(
@@ -129,6 +135,12 @@ export const generatePermissionsLibrary = async (
       isExported: true,
     });
 
+    destination.addTypeAlias({
+      name: generateName('Delete', 'Permission'),
+      type: `DeletePermission<${boolExpType.getName()}>`,
+      isExported: true,
+    });
+
     const entityPermissionsType = destination.addTypeAlias({
       name: generateName('Permissions'),
       type: `EntityPermissions<${validRolesType.getName()}, ${boolExpType.getName()}, ${columnsEnum.getName()}>`,
@@ -147,32 +159,70 @@ export const generatePermissionsLibrary = async (
 
 type Columns = string[] | '*';
 
-type WriteablePermissions = {
+export type WriteablePermissions = {
   fileName: string;
   permissions: {
     insert_permissions?: {
-      check: Record<string, unknown>;
-      columns: Columns;
-      backend_only?: boolean;
-      set?: Record<string, unknown>;
+      role: string;
+      permission: {
+        check: Record<string, unknown>;
+        columns?: Columns;
+        backend_only?: boolean;
+        set?: Record<string, unknown>;
+      };
     }[];
     select_permissions?: {
-      filter: Record<string, unknown>;
-      columns: Columns;
-      backend_only?: boolean;
-      limit?: number;
-      allow_aggregations?: boolean;
-    };
+      role: string;
+      permission: {
+        filter: Record<string, unknown>;
+        columns: Columns;
+        backend_only?: boolean;
+        limit?: number;
+        allow_aggregations?: boolean;
+      };
+    }[];
     update_permissions?: {
-      filter: Record<string, unknown>;
-      check: Record<string, unknown>;
-      columns: Columns;
-      backend_only?: boolean;
-      set?: Record<string, unknown>;
+      role: string;
+      permission: {
+        filter?: Record<string, unknown>;
+        check?: Record<string, unknown>;
+        columns: Columns;
+        backend_only?: boolean;
+        set?: Record<string, unknown>;
+      };
+    }[];
+    delete_permissions?: {
+      role: string;
+      permission: {
+        filter?: Record<string, unknown>;
+        backend_only?: boolean;
+      };
     };
   };
 }[];
 
-export const writePermissions = (permissions: WriteablePermissions) => {
-  console.log(permissions);
+export const writePermissions = (
+  config: {
+    pathToHasuraDir: string;
+    databaseName: string;
+  },
+  permissions: WriteablePermissions
+) => {
+  // TODO Optimize this with a pool to write to files in parallel
+
+  const { databaseName, pathToHasuraDir } = config;
+
+  for (const { fileName, permissions: p } of permissions) {
+    const tableYamlPath = `${pathToHasuraDir}/metadata/databases/${databaseName}/tables/${fileName}`;
+    const tableYaml = readFileSync(tableYamlPath, 'utf8');
+    const tableYamlJson = load(tableYaml) as Record<string, any>;
+
+    tableYamlJson['insert_permissions'] = p.insert_permissions;
+    tableYamlJson['select_permissions'] = p.select_permissions;
+    tableYamlJson['update_permissions'] = p.update_permissions;
+    tableYamlJson['delete_permissions'] = p.delete_permissions;
+
+    const yamlString = dump(tableYamlJson);
+    writeFileSync(tableYamlPath, yamlString, 'utf8');
+  }
 };

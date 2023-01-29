@@ -34,6 +34,12 @@ export type PermissionGeneratorConfig = {
      * The name of the typescript file that contains the generated GraphQL types for your Hasura instance
      */
     sourceFile: string;
+
+    /** The logical import statement that should be used to access the graphql-types from the generated permissions lib
+     *  If the permissions lib outputDir is going to be adjacent to the graphql-types file, a relative path can be used.
+     *  Inside a monorepo, this might be the path to your graphql-types package eg. @my-org/graphql-types
+     */
+    importDeclaration: string;
   };
 
   /** The absolute path for where the generated files should be placed */

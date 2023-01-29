@@ -16,3 +16,39 @@ array_relationships:
         table:
           name: posts
           schema: public
+insert_permissions:
+  - role: user
+    permission:
+      check:
+        id:
+          _eq: X-Hasura-Org-Id
+      set:
+        createdAt: now()
+      columns:
+        - name
+select_permissions:
+  - role: user
+    permission:
+      columns: '*'
+      filter:
+        id:
+          _eq: X-Hasura-Org-Id
+      allow_aggregations: true
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - name
+      filter:
+        id:
+          _eq: X-Hasura-Org-Id
+      check: null
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        memberships_aggregate:
+          count:
+            predicate:
+              _lte: 0
+      backend_only: true
