@@ -6,7 +6,7 @@ import {
 } from './generator';
 import { join } from 'path';
 import { cwd } from 'process';
-import { OrganizationsExportablePermission } from './fixture/permissions';
+import { OrganizationsExportablePermission } from '../../fixture/permissions';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { dump, load } from 'js-yaml';
 
