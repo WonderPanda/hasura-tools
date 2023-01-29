@@ -49,7 +49,7 @@ describe('permissions generator', () => {
     });
 
     const generatedFile = readFileSync(outputFile, 'utf8');
-    console.log(generatedFile);
+    expect(generatedFile).toMatchSnapshot();
   });
 
   it('writes permissions to the correct metadata files', async () => {
