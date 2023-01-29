@@ -32,6 +32,7 @@ specifiers:
   ts-morph: ^17.0.1
   ts-node: 10.9.1
   tslib: ^2.3.0
+  type-fest: ^3.5.3
   typescript: ~4.8.2
   zod: ^3.20.2
 
@@ -41,6 +42,7 @@ dependencies:
   lodash: 4.17.21
   ts-morph: 17.0.1
   tslib: 2.4.1
+  type-fest: 3.5.3
   zod: 3.20.2
 
 devDependencies:
@@ -10160,6 +10162,11 @@ packages:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
     engines: {node: '>=10'}
     dev: true
+
+  /type-fest/3.5.3:
+    resolution: {integrity: sha512-V2+og4j/rWReWvaFrse3s9g2xvUv/K9Azm/xo6CjIuq7oeGqsoimC7+9/A3tfvNcbQf8RPSVj/HV81fB4DJrjA==}
+    engines: {node: '>=14.16'}
+    dev: false
 
   /type-is/1.6.18:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}

@@ -28,7 +28,10 @@ describe('permissions generator', () => {
     const outputFile = join(outputDir, 'permissions.ts');
 
     // Delete the file and make sure it doesn't exist
-    unlinkSync(outputFile);
+    try {
+      unlinkSync(outputFile);
+      // eslint-disable-next-line no-empty
+    } catch {}
 
     expect(() => readFileSync(outputFile, 'utf8')).toThrow();
 
@@ -91,10 +94,10 @@ describe('permissions generator', () => {
                   _eq: 'X-Hasura-Org-Id',
                 },
               },
-              columns: ['name'],
+              columns: ['name', 'updated_at'],
               backend_only: false,
               set: {
-                createdAt: 'now()',
+                created_at: 'now()',
               },
             },
           },
@@ -132,11 +135,9 @@ describe('permissions generator', () => {
             permission: {
               backend_only: true,
               filter: {
-                memberships_aggregate: {
-                  count: {
-                    predicate: {
-                      _lte: 0,
-                    },
+                memberships: {
+                  user_id: {
+                    _eq: 'X-Hasura-User-Id',
                   },
                 },
               },
@@ -174,4 +175,6 @@ describe('permissions generator', () => {
       permission.permissions.delete_permissions
     );
   });
+
+  it.todo('can be successfully applied against a running Hasura instance');
 });

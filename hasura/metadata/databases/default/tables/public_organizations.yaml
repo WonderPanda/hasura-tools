@@ -22,18 +22,20 @@ insert_permissions:
       check:
         id:
           _eq: X-Hasura-Org-Id
-      set:
-        createdAt: now()
       columns:
         - name
+        - updated_at
+      backend_only: false
+      set:
+        created_at: now()
 select_permissions:
   - role: user
     permission:
+      allow_aggregations: true
       columns: '*'
       filter:
         id:
           _eq: X-Hasura-Org-Id
-      allow_aggregations: true
 update_permissions:
   - role: user
     permission:
@@ -42,13 +44,11 @@ update_permissions:
       filter:
         id:
           _eq: X-Hasura-Org-Id
-      check: null
 delete_permissions:
   - role: user
     permission:
-      filter:
-        memberships_aggregate:
-          count:
-            predicate:
-              _lte: 0
       backend_only: true
+      filter:
+        memberships:
+          user_id:
+            _eq: X-Hasura-User-Id

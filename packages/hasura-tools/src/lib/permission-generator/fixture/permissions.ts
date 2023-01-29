@@ -1,4 +1,14 @@
-import { MembershipsBoolExp, MembershipsSelectColumn, OrganizationsBoolExp, OrganizationsSelectColumn, PostsBoolExp, PostsSelectColumn, UsersBoolExp, UsersSelectColumn } from "@pandaverse/graphql-types";
+import { SnakeCase, SnakeCasedPropertiesDeep } from 'type-fest';
+import {
+  MembershipsBoolExp,
+  MembershipsSelectColumn,
+  OrganizationsBoolExp,
+  OrganizationsSelectColumn,
+  PostsBoolExp,
+  PostsSelectColumn,
+  UsersBoolExp,
+  UsersSelectColumn,
+} from '@pandaverse/graphql-types';
 
 export type SessionVariables = 'now()' | 'X-Hasura-Org-Id' | 'X-Hasura-User-Id';
 export interface InsertPermission<TBoolExp, TSelectColumn extends string> {
@@ -7,7 +17,6 @@ export interface InsertPermission<TBoolExp, TSelectColumn extends string> {
   set?: Partial<Record<TSelectColumn, string>>;
   backend_only?: boolean;
 }
-
 
 export interface SelectPermission<TBoolExp, TSelectColumn extends string> {
   filter: TBoolExp;
@@ -24,7 +33,6 @@ export interface SelectPermission<TBoolExp, TSelectColumn extends string> {
   allow_aggregations?: boolean;
 }
 
-
 export interface UpdatePermission<
   TBoolExp,
   TSelectColumn extends string,
@@ -39,12 +47,10 @@ export interface UpdatePermission<
   set?: Partial<Record<TSelectColumn, TSessionVariables>>;
 }
 
-
 export interface DeletePermission<TBoolExp> {
   filter?: TBoolExp;
   backend_only?: boolean;
 }
-
 
 export interface InsertPermissionForRole<
   TRoles extends string,
@@ -55,7 +61,6 @@ export interface InsertPermissionForRole<
   permission: InsertPermission<TBoolExp, TSelectColumn>;
 }
 
-
 export interface SelectPermissionForRole<
   TRoles extends string,
   TBoolExp,
@@ -64,7 +69,6 @@ export interface SelectPermissionForRole<
   role: TRoles;
   permission: SelectPermission<TBoolExp, TSelectColumn>;
 }
-
 
 export interface UpdatePermissionForRole<
   TRoles extends string,
@@ -75,12 +79,10 @@ export interface UpdatePermissionForRole<
   permission: UpdatePermission<TBoolExp, TSelectColumn>;
 }
 
-
 export interface DeletePermissionForRole<TRoles extends string, TBoolExp> {
   role: TRoles;
   permission: DeletePermission<TBoolExp>;
 }
-
 
 export interface EntityPermissions<
   TRoles extends string,
@@ -105,7 +107,6 @@ export interface EntityPermissions<
   delete_permissions?: DeletePermissionForRole<TRoles, TBoolExp>[];
 }
 
-
 export interface PermissionsExport<
   TFileName extends string,
   TPermissions extends Record<string, any>
@@ -116,30 +117,106 @@ export interface PermissionsExport<
 
 export type ValidRoles = 'user' | 'org-admin';
 /** Insert permissions that can be applied to the Memberships table */
-export type MembershipsInsertPermission = InsertPermission<MembershipsBoolExp, MembershipsSelectColumn>;
-export type MembershipsSelectPermission = SelectPermission<MembershipsBoolExp, MembershipsSelectColumn>;
-export type MembershipsUpdatePermission = UpdatePermission<MembershipsBoolExp, MembershipsSelectColumn, SessionVariables>;
-export type MembershipsDeletePermission = DeletePermission<MembershipsBoolExp>;
-export type MembershipsPermissions = EntityPermissions<ValidRoles, MembershipsBoolExp, MembershipsSelectColumn>;
-export type MembershipsExportablePermission = PermissionsExport<'public_memberships.yaml', MembershipsPermissions>;
+export type MembershipsInsertPermission = InsertPermission<
+  SnakeCasedPropertiesDeep<MembershipsBoolExp>,
+  SnakeCase<MembershipsSelectColumn>
+>;
+export type MembershipsSelectPermission = SelectPermission<
+  SnakeCasedPropertiesDeep<MembershipsBoolExp>,
+  SnakeCase<MembershipsSelectColumn>
+>;
+export type MembershipsUpdatePermission = UpdatePermission<
+  SnakeCasedPropertiesDeep<MembershipsBoolExp>,
+  SnakeCase<MembershipsSelectColumn>,
+  SessionVariables
+>;
+export type MembershipsDeletePermission = DeletePermission<
+  SnakeCasedPropertiesDeep<MembershipsBoolExp>
+>;
+export type MembershipsPermissions = EntityPermissions<
+  ValidRoles,
+  SnakeCasedPropertiesDeep<MembershipsBoolExp>,
+  SnakeCase<MembershipsSelectColumn>
+>;
+export type MembershipsExportablePermission = PermissionsExport<
+  'public_memberships.yaml',
+  MembershipsPermissions
+>;
 /** Insert permissions that can be applied to the Organizations table */
-export type OrganizationsInsertPermission = InsertPermission<OrganizationsBoolExp, OrganizationsSelectColumn>;
-export type OrganizationsSelectPermission = SelectPermission<OrganizationsBoolExp, OrganizationsSelectColumn>;
-export type OrganizationsUpdatePermission = UpdatePermission<OrganizationsBoolExp, OrganizationsSelectColumn, SessionVariables>;
-export type OrganizationsDeletePermission = DeletePermission<OrganizationsBoolExp>;
-export type OrganizationsPermissions = EntityPermissions<ValidRoles, OrganizationsBoolExp, OrganizationsSelectColumn>;
-export type OrganizationsExportablePermission = PermissionsExport<'public_organizations.yaml', OrganizationsPermissions>;
+export type OrganizationsInsertPermission = InsertPermission<
+  SnakeCasedPropertiesDeep<OrganizationsBoolExp>,
+  SnakeCase<OrganizationsSelectColumn>
+>;
+export type OrganizationsSelectPermission = SelectPermission<
+  SnakeCasedPropertiesDeep<OrganizationsBoolExp>,
+  SnakeCase<OrganizationsSelectColumn>
+>;
+export type OrganizationsUpdatePermission = UpdatePermission<
+  SnakeCasedPropertiesDeep<OrganizationsBoolExp>,
+  SnakeCase<OrganizationsSelectColumn>,
+  SessionVariables
+>;
+export type OrganizationsDeletePermission = DeletePermission<
+  SnakeCasedPropertiesDeep<OrganizationsBoolExp>
+>;
+export type OrganizationsPermissions = EntityPermissions<
+  ValidRoles,
+  SnakeCasedPropertiesDeep<OrganizationsBoolExp>,
+  SnakeCase<OrganizationsSelectColumn>
+>;
+export type OrganizationsExportablePermission = PermissionsExport<
+  'public_organizations.yaml',
+  OrganizationsPermissions
+>;
 /** Insert permissions that can be applied to the Posts table */
-export type PostsInsertPermission = InsertPermission<PostsBoolExp, PostsSelectColumn>;
-export type PostsSelectPermission = SelectPermission<PostsBoolExp, PostsSelectColumn>;
-export type PostsUpdatePermission = UpdatePermission<PostsBoolExp, PostsSelectColumn, SessionVariables>;
-export type PostsDeletePermission = DeletePermission<PostsBoolExp>;
-export type PostsPermissions = EntityPermissions<ValidRoles, PostsBoolExp, PostsSelectColumn>;
-export type PostsExportablePermission = PermissionsExport<'public_posts.yaml', PostsPermissions>;
+export type PostsInsertPermission = InsertPermission<
+  SnakeCasedPropertiesDeep<PostsBoolExp>,
+  SnakeCase<PostsSelectColumn>
+>;
+export type PostsSelectPermission = SelectPermission<
+  SnakeCasedPropertiesDeep<PostsBoolExp>,
+  SnakeCase<PostsSelectColumn>
+>;
+export type PostsUpdatePermission = UpdatePermission<
+  SnakeCasedPropertiesDeep<PostsBoolExp>,
+  SnakeCase<PostsSelectColumn>,
+  SessionVariables
+>;
+export type PostsDeletePermission = DeletePermission<
+  SnakeCasedPropertiesDeep<PostsBoolExp>
+>;
+export type PostsPermissions = EntityPermissions<
+  ValidRoles,
+  SnakeCasedPropertiesDeep<PostsBoolExp>,
+  SnakeCase<PostsSelectColumn>
+>;
+export type PostsExportablePermission = PermissionsExport<
+  'public_posts.yaml',
+  PostsPermissions
+>;
 /** Insert permissions that can be applied to the Users table */
-export type UsersInsertPermission = InsertPermission<UsersBoolExp, UsersSelectColumn>;
-export type UsersSelectPermission = SelectPermission<UsersBoolExp, UsersSelectColumn>;
-export type UsersUpdatePermission = UpdatePermission<UsersBoolExp, UsersSelectColumn, SessionVariables>;
-export type UsersDeletePermission = DeletePermission<UsersBoolExp>;
-export type UsersPermissions = EntityPermissions<ValidRoles, UsersBoolExp, UsersSelectColumn>;
-export type UsersExportablePermission = PermissionsExport<'public_users.yaml', UsersPermissions>;
+export type UsersInsertPermission = InsertPermission<
+  SnakeCasedPropertiesDeep<UsersBoolExp>,
+  SnakeCase<UsersSelectColumn>
+>;
+export type UsersSelectPermission = SelectPermission<
+  SnakeCasedPropertiesDeep<UsersBoolExp>,
+  SnakeCase<UsersSelectColumn>
+>;
+export type UsersUpdatePermission = UpdatePermission<
+  SnakeCasedPropertiesDeep<UsersBoolExp>,
+  SnakeCase<UsersSelectColumn>,
+  SessionVariables
+>;
+export type UsersDeletePermission = DeletePermission<
+  SnakeCasedPropertiesDeep<UsersBoolExp>
+>;
+export type UsersPermissions = EntityPermissions<
+  ValidRoles,
+  SnakeCasedPropertiesDeep<UsersBoolExp>,
+  SnakeCase<UsersSelectColumn>
+>;
+export type UsersExportablePermission = PermissionsExport<
+  'public_users.yaml',
+  UsersPermissions
+>;

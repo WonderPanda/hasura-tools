@@ -76,17 +76,39 @@ export const generatePermissionsLibrary = async (
     const generateName = (...words: string[]) =>
       nameFromNamingConvention(namingConvention, tableTypeName, ...words);
 
+    const boolExpType = typesFile
+      .getTypeAliasOrThrow(generateName('Bool', 'Exp'))
+      .getName();
+
+    const columnsEnumType = typesFile
+      .getTypeAliasOrThrow(generateName('Select', 'Column'))
+      .getName();
+
     return {
       tableName: entityName,
       metadataFileName,
       tableTypeName,
-      boolExpType: typesFile.getTypeAliasOrThrow(generateName('Bool', 'Exp')),
+      originalBoolExpType: boolExpType,
+      boolExpType:
+        namingConvention === 'graphql-default'
+          ? `SnakeCasedPropertiesDeep<${boolExpType}>`
+          : boolExpType,
       // TODO: support configuration between enum/type
-      columnsEnum: typesFile.getTypeAliasOrThrow(
-        generateName('Select', 'Column')
-      ),
+      originalColumnsEnumType: columnsEnumType,
+      columnsEnum:
+        namingConvention === 'graphql-default'
+          ? `SnakeCase<${columnsEnumType}>`
+          : columnsEnumType,
     };
   });
+
+  if (namingConvention === 'graphql-default') {
+    destination
+      .addImportDeclaration({
+        moduleSpecifier: 'type-fest',
+      })
+      .addNamedImports(['SnakeCase', 'SnakeCasedPropertiesDeep']);
+  }
 
   destination
     .addImportDeclaration({
@@ -96,8 +118,8 @@ export const generatePermissionsLibrary = async (
     .addNamedImports(
       flatten(
         tableTypes.map((x) => [
-          { name: x.boolExpType.getName() },
-          { name: x.columnsEnum.getName() },
+          { name: x.originalBoolExpType },
+          { name: x.originalColumnsEnumType },
         ])
       )
     );
@@ -116,7 +138,7 @@ export const generatePermissionsLibrary = async (
 
     destination.addTypeAlias({
       name: generateName('Insert', 'Permission'),
-      type: `InsertPermission<${boolExpType.getName()}, ${columnsEnum.getName()}>`,
+      type: `InsertPermission<${boolExpType}, ${columnsEnum}>`,
       isExported: true,
       docs: [
         `Insert permissions that can be applied to the ${tableTypeName} table`,
@@ -125,25 +147,25 @@ export const generatePermissionsLibrary = async (
 
     destination.addTypeAlias({
       name: generateName('Select', 'Permission'),
-      type: `SelectPermission<${boolExpType.getName()}, ${columnsEnum.getName()}>`,
+      type: `SelectPermission<${boolExpType}, ${columnsEnum}>`,
       isExported: true,
     });
 
     destination.addTypeAlias({
       name: generateName('Update', 'Permission'),
-      type: `UpdatePermission<${boolExpType.getName()}, ${columnsEnum.getName()}, ${sessionVariables.getName()}>`,
+      type: `UpdatePermission<${boolExpType}, ${columnsEnum}, ${sessionVariables.getName()}>`,
       isExported: true,
     });
 
     destination.addTypeAlias({
       name: generateName('Delete', 'Permission'),
-      type: `DeletePermission<${boolExpType.getName()}>`,
+      type: `DeletePermission<${boolExpType}>`,
       isExported: true,
     });
 
     const entityPermissionsType = destination.addTypeAlias({
       name: generateName('Permissions'),
-      type: `EntityPermissions<${validRolesType.getName()}, ${boolExpType.getName()}, ${columnsEnum.getName()}>`,
+      type: `EntityPermissions<${validRolesType.getName()}, ${boolExpType}, ${columnsEnum}>`,
       isExported: true,
     });
 
@@ -197,7 +219,7 @@ export type WriteablePermissions = {
         filter?: Record<string, unknown>;
         backend_only?: boolean;
       };
-    };
+    }[];
   };
 }[];
 
