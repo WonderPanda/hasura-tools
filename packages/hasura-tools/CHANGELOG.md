@@ -1,5 +1,11 @@
 # @pandaverse/hasura-tools
 
+## 0.0.7
+
+### Patch Changes
+
+- 571ab9d: trigger version bump
+
 ## 0.0.6
 
 ### Patch Changes
