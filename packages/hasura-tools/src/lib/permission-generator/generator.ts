@@ -40,7 +40,7 @@ export const generatePermissionsLibrary = async (
   const sourceTypesProject = new Project({});
 
   const sourceTypesFile = sourceTypesProject.addSourceFileAtPath(
-    join(__dirname, 'types.ts')
+    join(__dirname, 'types.d.ts')
   );
 
   const interfacesToCopy = sourceTypesFile.getInterfaces();
