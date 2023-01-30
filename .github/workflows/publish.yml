@@ -22,7 +22,9 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm nx affected --base=origin/main --head=HEAD --target=build
+      # - run: pnpm nx affected --base=origin/main --head=HEAD --target=build
+      # TODO: get this working with affected so that merging a changesets PR properly executes the release
+      - run: pnpm nx build hasura-tools
 
       - name: Update Workspace file
         run: sed -e "s|'packages\/|'dist/\packages/|" pnpm-workspace.yaml > pnpm-new.yaml && mv pnpm-new.yaml pnpm-workspace.yaml

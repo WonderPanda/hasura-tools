@@ -1,2 +1,2 @@
 packages:
-  - 'packages/hasura-tools'
+  - 'dist/packages/hasura-tools'

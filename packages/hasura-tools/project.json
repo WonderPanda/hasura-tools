@@ -14,7 +14,7 @@
         "main": "packages/hasura-tools/src/index.ts",
         "assets": [
           "packages/hasura-tools/*.md",
-          "packages/hasura-tools/src/lib/permission-generator/types.ts"
+          "packages/hasura-tools/src/lib/permission-generator/types.d.ts"
         ]
       }
     },
