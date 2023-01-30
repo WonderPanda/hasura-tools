@@ -1,5 +1,11 @@
 # @pandaverse/hasura-tools
 
+## 0.0.3
+
+### Patch Changes
+
+- a79f285: version bump test
+
 ## 0.0.2
 
 ### Patch Changes
