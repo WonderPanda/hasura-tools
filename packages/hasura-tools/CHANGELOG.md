@@ -1,5 +1,11 @@
 # @pandaverse/hasura-tools
 
+## 0.0.6
+
+### Patch Changes
+
+- ced6b94: Switch to using ts declaration files
+
 ## 0.0.5
 
 ### Patch Changes
