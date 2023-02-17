@@ -12,13 +12,13 @@
     "@changesets/cli": "^2.26.0",
     "@graphql-codegen/cli": "^2.16.3",
     "@graphql-codegen/typescript": "^2.8.7",
-    "@nrwl/eslint-plugin-nx": "15.4.2",
-    "@nrwl/jest": "15.4.2",
-    "@nrwl/js": "15.4.2",
-    "@nrwl/linter": "15.4.2",
-    "@nrwl/node": "^15.4.2",
-    "@nrwl/web": "15.4.2",
-    "@nrwl/workspace": "15.4.2",
+    "@nrwl/eslint-plugin-nx": "15.7.1",
+    "@nrwl/jest": "15.7.1",
+    "@nrwl/js": "15.7.1",
+    "@nrwl/linter": "15.7.1",
+    "@nrwl/node": "15.7.1",
+    "@nrwl/web": "15.7.1",
+    "@nrwl/workspace": "15.7.1",
     "@types/jest": "28.1.1",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.191",
@@ -32,7 +32,7 @@
     "hasura-cli": "^2.16.1",
     "jest": "28.1.1",
     "jest-environment-jsdom": "28.1.1",
-    "nx": "15.4.2",
+    "nx": "15.7.1",
     "prettier": "^2.6.2",
     "ts-jest": "28.0.5",
     "ts-node": "10.9.1",
@@ -48,3 +48,4 @@
     "zod": "^3.20.2"
   }
 }
+

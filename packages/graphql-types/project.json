@@ -1,5 +1,5 @@
 {
-  "name": "shared-graphql-types",
+  "name": "graphql-types",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/graphql-types/src",
   "projectType": "library",
