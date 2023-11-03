@@ -5,6 +5,13 @@ import { scanTables } from './metadata.utils';
 import { capitalize, flatten } from 'lodash';
 import { join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
+import { toPairs } from 'remeda';
+
+const pairs = toPairs({
+  a: 1,
+  b: 2,
+});
+console.log(pairs);
 
 export const nameFromNamingConvention = (
   namingConvention: PermissionGeneratorConfig['namingConvention'] = 'graphql-default',
