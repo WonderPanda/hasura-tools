@@ -4,7 +4,7 @@
   "sourceRoot": "packages/hasura-tools/src",
   "projectType": "library",
   "targets": {
-    "build": {
+    "buildOLD": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
@@ -14,11 +14,28 @@
         "main": "packages/hasura-tools/src/index.ts",
         "assets": [
           "packages/hasura-tools/*.md",
-          "packages/hasura-tools/src/lib/permission-generator/types.d.ts"
+          "packages/hasura-tools/src/lib/permission-generator/types.d.ts",
+          "packages/hasura-tools/src/types.d.ts"
         ],
         "updateBuildableProjectDepsInPackageJson": true
       }
     },
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/hasura-tools",
+        "main": "packages/hasura-tools/src/index.ts",
+        "tsConfig": "packages/hasura-tools/tsconfig.lib.json",
+        "assets": ["packages/hasura-tools/src/types.d.ts"],
+        "project": "packages/hasura-tools/package.json",
+        "compiler": "swc",
+        "format": ["cjs", "esm"],
+        "updateBuildableProjectDepsInPackageJson": true,
+        "external": ["ts-morph", "js-yaml", "remeda", "lodash", "type-fest"]
+      }
+    },
+
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],

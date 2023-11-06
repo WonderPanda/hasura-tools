@@ -1,3 +1,5 @@
+export type NamingConvention = 'graphql-default' | 'hasura-default';
+
 export type PermissionGeneratorConfig = {
   /** The absolute path of the standard Hasura config. It should contain metadata, seeds etc */
   pathToHasuraDir: string;
@@ -13,7 +15,12 @@ export type PermissionGeneratorConfig = {
   /** The naming convention used for your Hasura instance. This will influence whether your types are PascalCase or Snake_Case
    * Defaults to 'graphql-default'
    */
-  namingConvention?: 'graphql-default' | 'hasura-default';
+  namingConvention?: NamingConvention;
+
+  /**
+   * A filter function that can be used to limit which tables are processed for permissions
+   */
+  tableFilter?: (tableName: string) => boolean;
 
   /** The Hasura roles that you wish to generate permissions for */
   roles: string[];
@@ -41,7 +48,17 @@ export type PermissionGeneratorConfig = {
      */
     importDeclaration: string;
   };
+  /**
+   * An object containing information about where generated artifacts should be placed
+   */
+  output: {
+    /** The absolute path for where the generated files should be placed */
+    outputDir: string;
 
-  /** The absolute path for where the generated files should be placed */
-  outputDir: string;
+    /**
+     * The name of the generated file which will contain all of the types for writing permissions in Typescript
+     * Defaults to 'permission-types.ts'
+     */
+    outputFileName?: string;
+  };
 };

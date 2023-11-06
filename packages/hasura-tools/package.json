@@ -1,4 +1,9 @@
 {
-  "name": "@pandaverse/hasura-tools",
-  "version": "0.0.6"
+  "name": "@level.up/hasura-permissions",
+  "version": "0.0.6",
+  "peerDependencies": {
+    "js-yaml": "^4.1.0",
+    "ts-morph": "^17.0.1",
+    "type-fest": "^3.5.3"
+  }
 }

@@ -2,189 +2,23 @@ import { PermissionGeneratorConfig } from './config';
 import { dump, load } from 'js-yaml';
 import { Project } from 'ts-morph';
 import { scanTables } from './metadata.utils';
-import { capitalize, flatten } from 'lodash';
-import { join } from 'path';
 import { readFileSync, writeFileSync } from 'fs';
-import { toPairs } from 'remeda';
-
-const pairs = toPairs({
-  a: 1,
-  b: 2,
-});
-console.log(pairs);
-
-export const nameFromNamingConvention = (
-  namingConvention: PermissionGeneratorConfig['namingConvention'] = 'graphql-default',
-  ...words: string[]
-) => {
-  return namingConvention === 'graphql-default'
-    ? words.join('')
-    : words.join('_');
-};
-
-export const generatePermissionsLibrary = async (
-  config: PermissionGeneratorConfig
-) => {
-  const {
-    databaseName,
-    outputDir,
-    graphqlTypes,
-    pathToHasuraDir,
-    roles,
-    namingConvention = 'graphql-default',
-    schemaNames = ['public'],
-    allowedSessionVariables,
-  } = config;
-
-  const { pathToTsConfig, sourceFile, importDeclaration } = graphqlTypes;
-
-  const tableNames = await scanTables({
-    databaseName,
-    pathToHasuraDir,
-    schemaNames,
-  });
-
-  const sourceTypesProject = new Project({});
-
-  const sourceTypesFile = sourceTypesProject.addSourceFileAtPath(
-    join(__dirname, 'types.d.ts')
-  );
-
-  const interfacesToCopy = sourceTypesFile.getInterfaces();
-
-  const outputProject = new Project({
-    tsConfigFilePath: pathToTsConfig,
-  });
-
-  const typesFile = outputProject.getSourceFileOrThrow(sourceFile);
-
-  const destination = outputProject.createSourceFile(
-    `${outputDir}/permissions.ts`,
-    undefined,
-    {
-      overwrite: true,
-    }
-  );
-
-  const sessionVariables = destination.addTypeAlias({
-    isExported: true,
-    name: 'SessionVariables',
-    type: allowedSessionVariables
-      ? allowedSessionVariables.map((sv) => `'${sv}'`).join(' | ')
-      : 'string | number',
-  });
-
-  interfacesToCopy.forEach((i) => destination.addStatements(i.getFullText()));
-
-  const tableTypes = tableNames.map(({ entityName, metadataFileName }) => {
-    const tableTypeName = capitalize(entityName);
-    const generateName = (...words: string[]) =>
-      nameFromNamingConvention(namingConvention, tableTypeName, ...words);
-
-    const boolExpType = typesFile
-      .getTypeAliasOrThrow(generateName('Bool', 'Exp'))
-      .getName();
-
-    const columnsEnumType = typesFile
-      .getTypeAliasOrThrow(generateName('Select', 'Column'))
-      .getName();
-
-    return {
-      tableName: entityName,
-      metadataFileName,
-      tableTypeName,
-      originalBoolExpType: boolExpType,
-      boolExpType:
-        namingConvention === 'graphql-default'
-          ? `SnakeCasedPropertiesDeep<${boolExpType}>`
-          : boolExpType,
-      // TODO: support configuration between enum/type
-      originalColumnsEnumType: columnsEnumType,
-      columnsEnum:
-        namingConvention === 'graphql-default'
-          ? `SnakeCase<${columnsEnumType}>`
-          : columnsEnumType,
-    };
-  });
-
-  if (namingConvention === 'graphql-default') {
-    destination
-      .addImportDeclaration({
-        moduleSpecifier: 'type-fest',
-      })
-      .addNamedImports(['SnakeCase', 'SnakeCasedPropertiesDeep']);
-  }
-
-  destination
-    .addImportDeclaration({
-      // TODO: Make this configurable
-      moduleSpecifier: importDeclaration,
-    })
-    .addNamedImports(
-      flatten(
-        tableTypes.map((x) => [
-          { name: x.originalBoolExpType },
-          { name: x.originalColumnsEnumType },
-        ])
-      )
-    );
-
-  const validRolesType = destination.addTypeAlias({
-    name: 'ValidRoles',
-    type: roles.map((role) => `'${role}'`).join(' | '),
-    isExported: true,
-  });
-
-  tableTypes.forEach((tableType) => {
-    const { tableTypeName, boolExpType, columnsEnum, metadataFileName } =
-      tableType;
-    const generateName = (...words: string[]) =>
-      nameFromNamingConvention(namingConvention, tableTypeName, ...words);
-
-    destination.addTypeAlias({
-      name: generateName('Insert', 'Permission'),
-      type: `InsertPermission<${boolExpType}, ${columnsEnum}>`,
-      isExported: true,
-      docs: [
-        `Insert permissions that can be applied to the ${tableTypeName} table`,
-      ],
-    });
-
-    destination.addTypeAlias({
-      name: generateName('Select', 'Permission'),
-      type: `SelectPermission<${boolExpType}, ${columnsEnum}>`,
-      isExported: true,
-    });
-
-    destination.addTypeAlias({
-      name: generateName('Update', 'Permission'),
-      type: `UpdatePermission<${boolExpType}, ${columnsEnum}, ${sessionVariables.getName()}>`,
-      isExported: true,
-    });
-
-    destination.addTypeAlias({
-      name: generateName('Delete', 'Permission'),
-      type: `DeletePermission<${boolExpType}>`,
-      isExported: true,
-    });
-
-    const entityPermissionsType = destination.addTypeAlias({
-      name: generateName('Permissions'),
-      type: `EntityPermissions<${validRolesType.getName()}, ${boolExpType}, ${columnsEnum}>`,
-      isExported: true,
-    });
-
-    destination.addTypeAlias({
-      name: generateName('Exportable', 'Permission'),
-      type: `PermissionsExport<'${metadataFileName}', ${entityPermissionsType.getName()}>`,
-      isExported: true,
-    });
-  });
-
-  await outputProject.save();
-};
+import consola from 'consola';
+import { getTablesAndTypes } from './ast';
 
 type Columns = string[] | '*';
+
+const keyOrder = [
+  'table',
+  'object_relationships',
+  'array_relationships',
+  'computed_fields',
+  'insert_permissions',
+  'select_permissions',
+  'update_permissions',
+  'delete_permissions',
+  'event_triggers',
+];
 
 export type WriteablePermissions = {
   fileName: string;
@@ -202,7 +36,7 @@ export type WriteablePermissions = {
       role: string;
       permission: {
         filter: Record<string, unknown>;
-        columns: Columns;
+        columns: Columns | { exclude: string[] };
         backend_only?: boolean;
         limit?: number;
         allow_aggregations?: boolean;
@@ -228,28 +62,164 @@ export type WriteablePermissions = {
   };
 }[];
 
-export const writePermissions = (
-  config: {
-    pathToHasuraDir: string;
-    databaseName: string;
-  },
-  permissions: WriteablePermissions
+type PolicyViolation = {
+  message: string;
+};
+
+type PolicyFunc = ({
+  permissions,
+  tableName,
+  columns,
+}: {
+  tableName: string;
+  columns: string[];
+  permissions: WriteablePermissions[number]['permissions'] | undefined;
+}) => undefined | PolicyViolation;
+
+export type PermissionPolicy = {
+  policyName: string;
+
+  /**
+   * A predicate function which will be used to determine which tables this policy belongs to. If
+   * none is provided then this policy will apply to all tables
+   */
+  tableFilter?: (tableName: string) => boolean;
+
+  policy: PolicyFunc;
+};
+
+/**
+ * Processes permissions evaluating any provided policies to make sure that there are no violations
+ *
+ * If no policy violations are detected, this will write the permissions to their respective Hasura metadata yaml files
+ */
+export const writePermissions = async (
+  config: PermissionGeneratorConfig,
+  permissions: WriteablePermissions,
+  policies?: PermissionPolicy[]
 ) => {
   // TODO Optimize this with a pool to write to files in parallel
 
-  const { databaseName, pathToHasuraDir } = config;
+  const {
+    databaseName,
+    graphqlTypes,
+    pathToHasuraDir,
+    namingConvention = 'graphql-default',
+    schemaNames = ['public'],
+    tableFilter = () => true,
+  } = config;
+
+  const { pathToTsConfig, sourceFile } = graphqlTypes;
+
+  const typesProject = new Project({
+    tsConfigFilePath: pathToTsConfig,
+  });
+  const typesFile = typesProject.getSourceFileOrThrow(sourceFile);
+
+  const scannedTables = await scanTables({
+    databaseName,
+    pathToHasuraDir,
+    schemaNames,
+  });
+
+  const tableTypes = getTablesAndTypes({
+    namingConvention,
+    sourceFile: typesFile,
+    tables: scannedTables.filter((t) => tableFilter(t.entityName)),
+  });
+
+  const evaluatedPolicies = (policies ?? []).map(
+    ({ policyName, policy, tableFilter = () => true }) => {
+      const relevantTables = tableTypes.filter((t) => tableFilter(t.tableName));
+      const potentialPolicyViolations = relevantTables.map(
+        ({ tableName, columns, metadataFileName }) => {
+          const permissionsForTable = permissions.find(
+            (p) => p.fileName === metadataFileName
+          );
+          return policy({
+            tableName,
+            columns,
+            permissions: permissionsForTable?.permissions,
+          });
+        }
+      );
+
+      return {
+        policyName,
+        violations: potentialPolicyViolations.filter(
+          (x) => x !== undefined
+        ) as PolicyViolation[],
+      };
+    }
+  );
+
+  let anyPolicyEvaluationFailed = false;
+
+  evaluatedPolicies.forEach(({ policyName, violations }) => {
+    const policyEvaluationFailed = violations.length > 0;
+    if (policyEvaluationFailed) {
+      anyPolicyEvaluationFailed = true;
+      consola.error(
+        `Policy '${policyName}' failed with the following violations:`
+      );
+      violations.forEach((v) => consola.error(`\t${v.message}`));
+    } else {
+      consola.success(`Policy '${policyName}' passed`);
+    }
+  });
+
+  if (anyPolicyEvaluationFailed) {
+    throw new Error('Policy violations detected');
+  }
 
   for (const { fileName, permissions: p } of permissions) {
     const tableYamlPath = `${pathToHasuraDir}/metadata/databases/${databaseName}/tables/${fileName}`;
     const tableYaml = readFileSync(tableYamlPath, 'utf8');
     const tableYamlJson = load(tableYaml) as Record<string, any>;
 
+    // TODO we shouldn't have to look this up with find
+    const { columns } = tableTypes.find(
+      (t) => t.metadataFileName === fileName
+    )!;
+
     tableYamlJson['insert_permissions'] = p.insert_permissions;
-    tableYamlJson['select_permissions'] = p.select_permissions;
+    tableYamlJson['select_permissions'] = (p.select_permissions ?? []).map(
+      (p) => {
+        // TODO type safety
+        const exclude: string[] | undefined = (p.permission.columns as any)[
+          'exclude'
+        ];
+        if (exclude) {
+          p.permission.columns = columns.filter((c) => !exclude.includes(c));
+        }
+
+        return p;
+      }
+    );
     tableYamlJson['update_permissions'] = p.update_permissions;
     tableYamlJson['delete_permissions'] = p.delete_permissions;
 
-    const yamlString = dump(tableYamlJson);
+    const yamlString = dump(tableYamlJson, {
+      noRefs: true,
+      sortKeys: (a, b) => {
+        const aIndex = keyOrder.indexOf(a);
+        const bIndex = keyOrder.indexOf(b);
+
+        if (aIndex === -1 && bIndex === -1) {
+          return 0;
+        }
+
+        if (aIndex > 0 && bIndex === -1) {
+          return 1;
+        }
+
+        if (aIndex > 0 && bIndex > 0) {
+          return aIndex < bIndex ? -1 : 1;
+        }
+
+        return 1;
+      },
+    });
     writeFileSync(tableYamlPath, yamlString, 'utf8');
   }
 };
