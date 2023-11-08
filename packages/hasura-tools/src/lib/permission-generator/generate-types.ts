@@ -116,14 +116,18 @@ export const generatePermissionsLibrary = async (
         name: string;
       }[]) ?? [];
 
-    const computedFieldsAlias = destination.addTypeAlias({
-      name: generateName('Computed', 'Fields'),
-      type: computedFields.map((c) => `'${c.name}'`).join(' | '),
-    });
+    let computedFieldTypeName = 'never';
+    if (computedFields.length > 0) {
+      const computedFieldsAlias = destination.addTypeAlias({
+        name: generateName('Computed', 'Fields'),
+        type: computedFields.map((c) => `'${c.name}'`).join(' | '),
+      });
+      computedFieldTypeName = computedFieldsAlias.getName();
+    }
 
     destination.addTypeAlias({
       name: generateName('Select', 'Permission'),
-      type: `SelectPermission<${boolExpTypeName}, ${columnsEnum}, ${computedFieldsAlias.getName()}>`,
+      type: `SelectPermission<${boolExpTypeName}, ${columnsEnum}, ${computedFieldTypeName}>`,
       isExported: true,
     });
 
@@ -141,7 +145,7 @@ export const generatePermissionsLibrary = async (
 
     const entityPermissionsType = destination.addTypeAlias({
       name: generateName('Permissions'),
-      type: `EntityPermissions<${validRolesType.getName()}, ${boolExpTypeName}, ${columnsEnum}, ${computedFieldsAlias.getName()}>`,
+      type: `EntityPermissions<${validRolesType.getName()}, ${boolExpTypeName}, ${columnsEnum}, ${computedFieldTypeName}>`,
       isExported: true,
     });
 

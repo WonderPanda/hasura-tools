@@ -177,10 +177,16 @@ export const writePermissions = async (
     const tableYaml = readFileSync(tableYamlPath, 'utf8');
     const tableYamlJson = load(tableYaml) as Record<string, any>;
 
-    // TODO we shouldn't have to look this up with find
-    const { columns } = tableTypes.find(
-      (t) => t.metadataFileName === fileName
-    )!;
+    const table = tableTypes.find((t) => t.metadataFileName === fileName);
+    if (!table) {
+      consola.warn(
+        `Could not find matching table for ${fileName}. Is it excluded by your table filter in configuration?`
+      );
+
+      return;
+    }
+
+    const { columns } = table;
 
     tableYamlJson['insert_permissions'] = p.insert_permissions;
     tableYamlJson['select_permissions'] = (p.select_permissions ?? []).map(
