@@ -1,8 +1,5 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`permissions generator generates a file containing permission types 1`] = `
-"import { SnakeCase, SnakeCasedPropertiesDeep } from \\"type-fest\\";
-import { MembershipsBoolExp, MembershipsSelectColumn, OrganizationsBoolExp, OrganizationsSelectColumn, PostsBoolExp, PostsSelectColumn, UsersBoolExp, UsersSelectColumn } from \\"@pandaverse/graphql-types\\";
+import { SnakeCase, SnakeCasedPropertiesDeep } from "type-fest";
+import { MembershipsBoolExp, MembershipsSelectColumn, OrganizationsBoolExp, OrganizationsSelectColumn, PostsBoolExp, PostsSelectColumn, UsersBoolExp, UsersSelectColumn } from "@pandaverse/graphql-types";
 
 export type SessionVariables = 'now()' | 'X-Hasura-Org-Id' | 'X-Hasura-User-Id';
 export interface InsertPermission<TBoolExp, TSelectColumn extends string> {
@@ -164,5 +161,3 @@ export type UsersUpdatePermission = UpdatePermission<SnakeCasedPropertiesDeep<Us
 export type UsersDeletePermission = DeletePermission<SnakeCasedPropertiesDeep<UsersBoolExp>>;
 export type UsersPermissions = EntityPermissions<ValidRoles, SnakeCasedPropertiesDeep<UsersBoolExp>, SnakeCase<UsersSelectColumn>, never>;
 export type UsersExportablePermission = PermissionsExport<'public_users.yaml', UsersPermissions>;
-"
-`;

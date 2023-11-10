@@ -1,3 +1,3 @@
 export * from './config';
-export * from './generator';
+export * from './write-permissions';
 export * from './generate-types';

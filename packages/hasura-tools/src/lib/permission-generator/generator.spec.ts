@@ -1,16 +1,34 @@
-import {
-  generatePermissionsLibrary,
-  nameFromNamingConvention,
-  WriteablePermissions,
-  writePermissions,
-} from './generator';
+import { WriteablePermissions, writePermissions } from './write-permissions';
+import { generatePermissionsLibrary } from './generate-types';
 import { join } from 'path';
 import { cwd } from 'process';
 import { OrganizationsExportablePermission } from '../../fixture/permissions';
 import { readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { dump, load } from 'js-yaml';
+import { nameFromNamingConvention } from './utils';
+import { PermissionGeneratorConfig } from './config';
 
 describe('permissions generator', () => {
+  const currentDir = cwd();
+  const pathToGraphQLTypesLib = join(currentDir, 'packages/graphql-types');
+  const outputDir = join(pathToGraphQLTypesLib, 'src/lib');
+  const outputFile = join(outputDir, 'permission-types.ts');
+
+  const config: PermissionGeneratorConfig = {
+    databaseName: 'default',
+    output: {
+      outputDir,
+    },
+    graphqlTypes: {
+      pathToTsConfig: join(pathToGraphQLTypesLib, 'tsconfig.lib.json'),
+      sourceFile: 'types.ts',
+      importDeclaration: '@pandaverse/graphql-types',
+    },
+    roles: ['user', 'org-admin'],
+    allowedSessionVariables: ['now()', 'X-Hasura-Org-Id', 'X-Hasura-User-Id'],
+    pathToHasuraDir: join(currentDir, 'hasura'),
+  };
+
   it('converts names based on a naming convention', () => {
     const words = ['These', 'Words', 'For', 'Name'];
     expect(nameFromNamingConvention('graphql-default', ...words)).toEqual(
@@ -22,11 +40,6 @@ describe('permissions generator', () => {
   });
 
   it('generates a file containing permission types', async () => {
-    const currentDir = cwd();
-    const pathToGraphQLTypesLib = join(currentDir, 'packages/graphql-types');
-    const outputDir = join(pathToGraphQLTypesLib, 'src/lib');
-    const outputFile = join(outputDir, 'permissions.ts');
-
     // Delete the file and make sure it doesn't exist
     try {
       unlinkSync(outputFile);
@@ -35,18 +48,7 @@ describe('permissions generator', () => {
 
     expect(() => readFileSync(outputFile, 'utf8')).toThrow();
 
-    await generatePermissionsLibrary({
-      databaseName: 'default',
-      outputDir,
-      graphqlTypes: {
-        pathToTsConfig: join(pathToGraphQLTypesLib, 'tsconfig.lib.json'),
-        sourceFile: 'types.ts',
-        importDeclaration: '@pandaverse/graphql-types',
-      },
-      roles: ['user', 'org-admin'],
-      allowedSessionVariables: ['now()', 'X-Hasura-Org-Id', 'X-Hasura-User-Id'],
-      pathToHasuraDir: join(currentDir, 'hasura'),
-    });
+    await generatePermissionsLibrary(config);
 
     const generatedFile = readFileSync(outputFile, 'utf8');
     expect(generatedFile).toMatchSnapshot();
@@ -69,6 +71,7 @@ describe('permissions generator', () => {
     };
 
     const tableYamlJson = readFileToJson();
+
     tableYamlJson.insert_permissions = [];
     tableYamlJson.select_permissions = [];
     tableYamlJson.update_permissions = [];
@@ -149,12 +152,10 @@ describe('permissions generator', () => {
 
     const permissions: WriteablePermissions = [permission];
 
-    writePermissions(
-      { databaseName: 'default', pathToHasuraDir: join(cwd(), 'hasura') },
-      permissions
-    );
+    await writePermissions(config, permissions);
 
     const tableYamlJsonAfterWrite = readFileToJson();
+
     expect(tableYamlJsonAfterWrite).toHaveProperty('insert_permissions');
     expect(tableYamlJsonAfterWrite.insert_permissions).toEqual(
       permission.permissions.insert_permissions

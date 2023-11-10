@@ -5,6 +5,7 @@ import { scanTables } from './metadata.utils';
 import { readFileSync, writeFileSync } from 'fs';
 import consola from 'consola';
 import { getTablesAndTypes } from './ast';
+import { snakeCase } from './utils';
 
 type Columns = string[] | '*';
 
@@ -187,6 +188,8 @@ export const writePermissions = async (
     }
 
     const { columns } = table;
+    const normalizedColumns =
+      namingConvention === 'graphql-default' ? columns.map(snakeCase) : columns;
 
     tableYamlJson['insert_permissions'] = p.insert_permissions;
     tableYamlJson['select_permissions'] = (p.select_permissions ?? []).map(
@@ -196,7 +199,7 @@ export const writePermissions = async (
           'exclude'
         ];
         if (exclude) {
-          p.permission.columns = columns.filter((c) => !exclude.includes(c));
+          p.permission.columns = normalizedColumns.filter((c) => !exclude.includes(c));
         }
 
         return p;

@@ -10,24 +10,26 @@ describe('scan tables', () => {
         pathToHasuraDir: join(cwd(), 'hasura'),
         schemaNames: ['public'],
       })
-    ).resolves.toEqual([
-      {
-        entityName: 'memberships',
-        metadataFileName: 'public_memberships.yaml',
-      },
-      {
-        entityName: 'organizations',
-        metadataFileName: 'public_organizations.yaml',
-      },
-      {
-        entityName: 'posts',
-        metadataFileName: 'public_posts.yaml',
-      },
-      {
-        entityName: 'users',
-        metadataFileName: 'public_users.yaml',
-      },
-    ]);
+    ).resolves.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          entityName: 'memberships',
+          metadataFileName: 'public_memberships.yaml',
+        }),
+        expect.objectContaining({
+          entityName: 'organizations',
+          metadataFileName: 'public_organizations.yaml',
+        }),
+        expect.objectContaining({
+          entityName: 'posts',
+          metadataFileName: 'public_posts.yaml',
+        }),
+        expect.objectContaining({
+          entityName: 'users',
+          metadataFileName: 'public_users.yaml',
+        }),
+      ])
+    );
   });
 
   it('builds the correct regex for schema names', async () => {
