@@ -1,6 +1,6 @@
 {
   "name": "@level.up/hasura-permissions",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "peerDependencies": {
     "js-yaml": "^4.1.0",
     "ts-morph": "^17.0.1",

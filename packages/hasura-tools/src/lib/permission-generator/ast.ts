@@ -75,7 +75,6 @@ export const getTablesAndTypes = ({
             : columnsEnumTypeName,
       };
     } catch (e) {
-      // console.log(e);
       console.log(`Unable to process types for entity ${entityName}`);
       return null;
     }

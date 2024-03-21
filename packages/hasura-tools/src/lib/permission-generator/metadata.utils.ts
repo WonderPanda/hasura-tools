@@ -34,12 +34,20 @@ export const scanTables = async ({
   });
 
   const regex = buildSchemaRegex(schemaNames);
-  return files.map((f) => ({
-    entityName: f.replace(regex, '').replace('.yaml', ''),
-    metadataFileName: f,
-    contents: load(readFileSync(join(metadataPath, f), 'utf-8')) as Record<
-      string,
-      unknown
-    >,
-  }));
+  return files.map((f) => {
+    // Non public schemas have the schema name automatically added as a prefix
+    const schemaName = schemaNames.find((s) => f.startsWith(`${s}_`))!;
+    const entityName = (
+      schemaName === 'public' ? f.replace(regex, '') : f
+    ).replace('.yaml', '');
+
+    return {
+      entityName,
+      metadataFileName: f,
+      contents: load(readFileSync(join(metadataPath, f), 'utf-8')) as Record<
+        string,
+        unknown
+      >,
+    };
+  });
 };
